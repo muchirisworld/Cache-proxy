@@ -13,29 +13,31 @@ public class Main {
 
     private static void promptCommand() {
         while (true) {
+            System.out.println("Enter command");
+            String input = scan.nextLine();
+
+            if (input.equalsIgnoreCase(EXIT_COMMAND)) {
+                System.out.println("Goodbye!");
+                break;
+            }
+
             try {
-                System.out.println("Enter command");
-                String input = scan.nextLine();
-
-                if (input.equalsIgnoreCase(EXIT_COMMAND)) {
-                    System.out.println("Goodbye!");
-                    break;
-                }
-
                 String[] prompt = validCommand(input);
-
-                if (prompt[0].equals("get")) {
-                    System.out.println(Cache.get(prompt[1]));
-                }
-
-                if (prompt[0].equals("put")) {
-                    System.out.println(Cache.put(prompt[1], prompt[2]));
-                }
+                String result = executeCommand(prompt);
+                System.out.println(result);
 
             } catch (IllegalArgumentException e) {
                 System.out.println(e);
             }
         }
+    }
+
+    private static String executeCommand(String[] prompt) {
+        return switch (prompt[0]) {
+            case "get" -> Cache.get(prompt[1]);
+            case "put" -> Cache.put(prompt[1], prompt[2]);
+            default -> throw new IllegalArgumentException("Invalid command");
+        };
     }
 
     private static String[] validCommand(String command) {

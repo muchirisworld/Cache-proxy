@@ -1,13 +1,9 @@
 package org.muchiri;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Cache {
-    private static final HashMap<String, String> store = new HashMap<>();
+    private static final LRUCache store = new LRUCache(3);
 
     private static boolean checkKey(String key) {
         return store.containsKey(key);

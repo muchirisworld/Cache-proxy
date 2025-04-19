@@ -36,6 +36,7 @@ public class Main {
         return switch (prompt[0]) {
             case "get" -> Cache.get(prompt[1]);
             case "put" -> Cache.put(prompt[1], prompt[2]);
+            case "print" -> Cache.print();
             default -> throw new IllegalArgumentException("Invalid command");
         };
     }
@@ -43,8 +44,8 @@ public class Main {
     private static String[] validCommand(String command) {
         String[] splitCommand = command.split(" ");
 
-        if (!splitCommand[0].equals("get") && !splitCommand[0].equals("put")) {
-            throw new IllegalArgumentException("Enter valid command! Command should start with either get or put");
+        if (!splitCommand[0].equals("get") && !splitCommand[0].equals("put") && !splitCommand[0].equals("print")) {
+            throw new IllegalArgumentException("Enter valid command! Command should start with either get, put or print");
         }
 
         if (splitCommand[0].equals("get") && splitCommand.length != 2) {
@@ -53,6 +54,10 @@ public class Main {
 
         if (splitCommand[0].equals("put") && splitCommand.length != 3) {
             throw new IllegalArgumentException("Enter valid command! enter a key and a value after put command");
+        }
+
+        if (splitCommand[0].equals("print") && splitCommand.length > 1) {
+            throw new IllegalArgumentException("Enter valid command! Enter no arguments after print command");
         }
 
         return splitCommand;

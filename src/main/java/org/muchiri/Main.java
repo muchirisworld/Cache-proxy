@@ -1,54 +1,86 @@
 package org.muchiri;
 
-import java.util.Scanner;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Main {
-    private static final Scanner scan = new Scanner(System.in);
-    private static final String EXIT_COMMAND = "exit";
 
-    public static void main(String[] args) {
-        Cache cache = new Cache(initiateCache());
-        promptCommand(cache);
-        scan.close();
+    private final Cache cache;
+    private final Socket socket;
+    private final InputStreamReader reader;
+    private final OutputStreamWriter writer;
+    private final BufferedReader in;
+    private final BufferedWriter out;
+
+    public Main(ServerSocket serverSocket) throws IOException {
+        this.cache = new Cache(3);
+        this.socket = serverSocket.accept();
+        this.reader = new InputStreamReader(socket.getInputStream());
+        this.writer = new OutputStreamWriter(socket.getOutputStream());
+        this.in = new BufferedReader(reader);
+        this.out = new BufferedWriter(writer);
     }
 
-    private static int initiateCache() {
+    public static void main(String[] args) throws IOException {
+        ServerSocket serverSocket = new ServerSocket(4000);
+        System.out.println("Server started on port 4000");
+        
         while (true) {
             try {
-                System.out.println("Enter cache size (integer): ");
-                String input = scan.nextLine();
-
-                if (input.equalsIgnoreCase(EXIT_COMMAND)) {
-                    System.out.println("Goodbye!");
-                    scan.close();
-                    System.exit(0);
-                }
-
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println(e);
+                System.out.println("Waiting for client connection...");
+                Main server = new Main(serverSocket);
+                server.run();
+            } catch (IOException e) {
+                System.err.println("Error handling client: " + e.getMessage());
             }
         }
     }
 
-    private static void promptCommand(Cache cache) {
-        while (true) {
-            System.out.println("Enter command");
-            String input = scan.nextLine();
+    public void run() {
+        try {
+            out.write("Welcome to the cache server!");
+            out.newLine();
+            out.write("Available commands: get <key>, put <key> <value>, print, exit");
+            out.newLine();
+            out.flush();
 
-            if (input.equalsIgnoreCase(EXIT_COMMAND)) {
-                System.out.println("Goodbye!");
-                break;
+            String input;
+            while ((input = in.readLine()) != null) {
+                if (input.equalsIgnoreCase("exit")) {
+                    System.out.println("Client requested to exit");
+                    break;
+                }
+                
+                try {
+                    String[] prompt = validCommand(normalizeInput(input));
+                    String result = executeCommand(cache, prompt);
+                    out.write(result);
+                    out.newLine();
+                    out.flush();
+                } catch (IllegalArgumentException e) {
+                    out.write("Error: " + e.getMessage());
+                    out.newLine();
+                    out.flush();
+                }
             }
+        } catch (IOException e) {
+            System.err.println("Error in client communication: " + e.getMessage());
+        } finally {
+            closeResources();
+        }
+    }
 
-            try {
-                String[] prompt = validCommand(input);
-                String result = executeCommand(cache, prompt);
-                System.out.println(result);
-
-            } catch (IllegalArgumentException e) {
-                System.out.println(e);
-            }
+    private void closeResources() {
+        try {
+            if (in != null) in.close();
+            if (out != null) out.close();
+            if (reader != null) reader.close();
+            if (writer != null) writer.close();
+            if (socket != null) socket.close();
+            System.out.println("Closed connection with client");
+        } catch (IOException e) {
+            System.err.println("Error closing resources: " + e.getMessage());
         }
     }
 
@@ -83,4 +115,17 @@ public class Main {
         return splitCommand;
     }
 
+    private static String normalizeInput(String input) {
+        StringBuilder result = new StringBuilder();
+        for (char ch : input.toCharArray()) {
+            if (ch == '\b' || ch == 127) { // Handle backspace (BS or DEL)
+                if (!result.isEmpty()) {
+                    result.deleteCharAt(result.length() - 1);
+                }
+            } else {
+                result.append(ch);
+            }
+        }
+        return result.toString();
+    }
 }

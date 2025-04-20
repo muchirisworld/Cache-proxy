@@ -7,11 +7,31 @@ public class Main {
     private static final String EXIT_COMMAND = "exit";
 
     public static void main(String[] args) {
-        promptCommand();
+        Cache cache = new Cache(initiateCache());
+        promptCommand(cache);
         scan.close();
     }
 
-    private static void promptCommand() {
+    private static int initiateCache() {
+        while (true) {
+            try {
+                System.out.println("Enter cache size (integer): ");
+                String input = scan.nextLine();
+
+                if (input.equalsIgnoreCase(EXIT_COMMAND)) {
+                    System.out.println("Goodbye!");
+                    scan.close();
+                    System.exit(0);
+                }
+
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println(e);
+            }
+        }
+    }
+
+    private static void promptCommand(Cache cache) {
         while (true) {
             System.out.println("Enter command");
             String input = scan.nextLine();
@@ -23,7 +43,7 @@ public class Main {
 
             try {
                 String[] prompt = validCommand(input);
-                String result = executeCommand(prompt);
+                String result = executeCommand(cache, prompt);
                 System.out.println(result);
 
             } catch (IllegalArgumentException e) {
@@ -32,11 +52,11 @@ public class Main {
         }
     }
 
-    private static String executeCommand(String[] prompt) {
+    private static String executeCommand(Cache cache, String[] prompt) {
         return switch (prompt[0]) {
-            case "get" -> Cache.get(prompt[1]);
-            case "put" -> Cache.put(prompt[1], prompt[2]);
-            case "print" -> Cache.print();
+            case "get" -> cache.get(prompt[1]);
+            case "put" -> cache.put(prompt[1], prompt[2]);
+            case "print" -> cache.print();
             default -> throw new IllegalArgumentException("Invalid command");
         };
     }

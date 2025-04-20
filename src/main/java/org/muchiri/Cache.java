@@ -3,17 +3,21 @@ package org.muchiri;
 import java.util.Arrays;
 
 public class Cache {
-    private static final LRUCache store = new LRUCache(3);
+    private final LRUCache store;
 
-    private static boolean checkKey(String key) {
+    public Cache(int capacity) {
+        this.store = new LRUCache(capacity);;
+    }
+
+    private boolean checkKey(String key) {
         return store.containsKey(key);
     }
 
-    private static String formatString(String key, String value) {
+    private String formatString(String key, String value) {
         return "[" + key + "] -> [" + value + "]";
     }
 
-    public static String put(String key, String value) {
+    public String put(String key, String value) {
         boolean existed = checkKey(key);
         store.put(key, value);
 
@@ -23,14 +27,14 @@ public class Cache {
         return "Stored " + formatString(key, value);
     }
 
-    public static String get(String key) {
+    public String get(String key) {
         String value = store.get(key);
 
         if (value == null) return "Key '" + key + "' not found";
         return value;
     }
 
-    public static String print() {
+    public String print() {
         String[] collect = store.entrySet().stream()
                 .map(entry -> formatString(entry.getKey(), entry.getValue()))
                 .toArray(String[]::new);

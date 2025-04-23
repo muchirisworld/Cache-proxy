@@ -20,7 +20,10 @@ public class Server {
         while (true) {
             try {
                 System.out.println("Waiting for client connection...");
-                handleClient(serverSocket.accept());
+//                handleClient(serverSocket.accept());
+                Socket clientSocket = serverSocket.accept();
+                Thread thread = new Thread(new ProxyHandler(clientSocket, origin, cache));
+                thread.start();
             } catch (IOException e) {
                 System.err.println("Error handling client: " + e.getMessage());
             }

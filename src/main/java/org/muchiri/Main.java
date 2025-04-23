@@ -1,7 +1,5 @@
 package org.muchiri;
 
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,13 +21,14 @@ public class Main {
                 }
             }
 
+            Cache cache = new Cache(3);
+
             if (clearCache) {
-                Cache cache = new Cache(3);
-                //TODO: Implement cache clearing
+                cache.clear();
                 System.exit(0);
             }
 
-            Server server = new Server(port, origin);
+            Server server = new Server(cache, port, origin);
             server.start();
 
         } catch (Exception e) {

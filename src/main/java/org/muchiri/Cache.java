@@ -34,6 +34,12 @@ public class Cache {
         return value;
     }
 
+    public void clear() {
+        store.clear();
+        System.out.println("Cache cleared.");
+    }
+
+
     public String print() {
         String[] collect = store.entrySet().stream()
                 .map(entry -> formatString(entry.getKey(), entry.getValue()))

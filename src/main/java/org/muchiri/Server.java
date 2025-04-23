@@ -9,8 +9,8 @@ public class Server {
     private final ServerSocket serverSocket;
     private final String origin;
 
-    public Server(int port, String origin) throws IOException {
-        this.cache = new Cache(3);
+    public Server(Cache cache, int port, String origin) throws IOException {
+        this.cache = cache;
         this.serverSocket = new ServerSocket(port);
         this.origin = origin;
     }
